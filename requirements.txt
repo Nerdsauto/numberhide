@@ -1,0 +1,6 @@
+aiogram==2.25.1
+Pillow
+numpy
+opencv-python
+easyocr
+python-dotenv
