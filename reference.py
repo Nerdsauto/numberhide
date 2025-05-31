@@ -10,25 +10,20 @@ import cv2
 import io
 from difflib import SequenceMatcher
 
-# TOKEN (ENV dan olinadi)
 API_TOKEN = os.getenv("API_TOKEN")
 
-# Loglar
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
-# EasyOCR modelini faqat 1 marta yuklaymiz
-reader = easyocr.Reader(['en'], gpu=False)  # GPU yo'q bo'lsa ham ishlaydi
+reader = easyocr.Reader(['en'], gpu=False)
 
-# Sticker logolari
 STICKERS = {
     "Real Auto": "Real.png",
     "Nerds Auto": "Nerds.png",
     "Jalil Auto": "Jalil.png"
 }
 
-# Reference raqam (qiyoslash uchun)
 REFERENCE_IMAGE_PATH = "reference_plate.jpeg"
 REFERENCE_TEXT = []
 REFERENCE_BBOX = None
@@ -44,7 +39,6 @@ def load_reference_plate():
 
 load_reference_plate()
 
-# User holatini eslab turish
 user_photos = {}
 user_states = {}
 
@@ -59,24 +53,23 @@ async def start_command(message: types.Message):
 @dp.message_handler(lambda message: message.text == "📷 Rasm almashtirish")
 async def ask_for_photo(message: types.Message):
     user_id = message.from_user.id
+    if user_states.get(user_id) != 'idle':
+        return
     user_states[user_id] = 'awaiting_photo'
     await message.reply("Iltimos, mashina rasmini yuboring.")
 
 @dp.message_handler(content_types=types.ContentType.PHOTO)
 async def receive_photo(message: types.Message):
     user_id = message.from_user.id
-
     if user_states.get(user_id) != 'awaiting_photo':
-        await message.reply("Iltimos, /start ni bosib menyudan foydalaning.")
         return
 
-    photo = message.photo[0]  # eng kichik rasm — tezroq
+    photo = message.photo[-1]  # eng yuqori sifatli rasm
     photo_bytes = await photo.download(destination=io.BytesIO())
     photo_bytes.seek(0)
     user_photos[user_id] = photo_bytes.read()
     user_states[user_id] = 'awaiting_logo'
 
-    # Logotip tanlash menyusi
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     for label in STICKERS:
         keyboard.add(KeyboardButton(label))
@@ -86,9 +79,7 @@ async def receive_photo(message: types.Message):
 @dp.message_handler(lambda message: message.text in STICKERS)
 async def apply_sticker(message: types.Message):
     user_id = message.from_user.id
-
     if user_states.get(user_id) != 'awaiting_logo' or user_id not in user_photos:
-        await message.reply("Avval rasm yuboring va logotip tanlang.")
         return
 
     selected_sticker_path = STICKERS[message.text]
@@ -100,7 +91,6 @@ async def apply_sticker(message: types.Message):
         await message.reply("Raqamni topa olmadim. Original rasm:")
         await message.reply_photo(photo=types.InputFile(io.BytesIO(user_photos[user_id]), filename="original.jpg"))
 
-    # Menyuga qaytish
     user_states[user_id] = 'idle'
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(KeyboardButton("📷 Rasm almashtirish"))
