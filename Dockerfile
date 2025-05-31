@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# 📦 OpenCV va EasyOCR uchun kerakli grafik kutubxonalarni o‘rnatish
+# 📦 Kutubxonalarni o‘rnatish
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
@@ -9,13 +9,16 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 📁 Ishchi papka
+# 🔐 BOT TOKENNI BERISH
+ENV API_TOKEN=7860498028:AAGV8cOHchdvyG9RVKUZDYIqi-Pr5oz9R-4
+
+# 📁 Ishchi katalog
 WORKDIR /app
 
-# 📂 Loyihani konteynerga ko‘chirish
+# 📂 Fayllarni konteynerga o‘tkazish
 COPY . /app
 
-# 🐍 Python kutubxonalarni o‘rnatish
+# 📦 Kutubxonalarni o‘rnatish
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
