@@ -78,10 +78,7 @@ async def apply_sticker_batch(message: types.Message):
     user_id = message.from_user.id
     user_waiting.discard(user_id)
 
-    if user_id not in user_projects or not user_projects[user_id]:
-        await message.reply("Iltimos, avval rasm yuboring.")
-        return
-
+   
     await message.reply("🛠 Ishlanmoqda...")
 
     selected_sticker = STICKERS[message.text]
