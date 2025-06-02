@@ -36,8 +36,8 @@ def load_reference_plate():
 
 load_reference_plate()
 
-user_projects = {}  # har bir user_id uchun bir nechta rasm
-user_waiting = set()  # stiker kutayotganlar
+user_projects = {}
+user_waiting = set()
 
 @dp.message_handler(commands=['start'])
 async def start_handler(message: types.Message):
@@ -45,8 +45,7 @@ async def start_handler(message: types.Message):
     user_projects[user_id] = []
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(KeyboardButton("📷 Rasm almashtirish"))
-    await message.reply("Assalomu alaykum!
-Rasm yuboring (bir yoki bir nechta).", reply_markup=keyboard)
+    await message.reply("Assalomu alaykum!\nRasm yuboring (bir yoki bir nechta).", reply_markup=keyboard)
 
 @dp.message_handler(lambda msg: msg.text == "📷 Rasm almashtirish")
 async def reset_session(message: types.Message):
@@ -65,7 +64,6 @@ async def collect_photos(message: types.Message):
         user_projects[user_id] = []
     user_projects[user_id].append(photo_bytes.read())
 
-    # Birinchi rasmda avtomatik stiker tanlash menyusi chiqadi
     if user_id not in user_waiting:
         user_waiting.add(user_id)
         keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -92,7 +90,6 @@ async def apply_sticker_batch(message: types.Message):
             await message.reply("❌ Raqam topilmadi.")
             await message.reply_photo(photo=types.InputFile(io.BytesIO(image_bytes), filename='original.jpg'))
 
-    # Yakuniy javob
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(KeyboardButton("📷 Rasm almashtirish"))
     await message.reply("✅ Tayyor. Yana almashtirmoqchi bo‘lsangiz menyudan foydalaning.", reply_markup=keyboard)
