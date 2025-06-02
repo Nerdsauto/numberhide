@@ -64,7 +64,7 @@ async def receive_photo(message: types.Message):
     if user_states.get(user_id) != 'awaiting_photo':
         return
 
-    photo = message.photo[-1]  # eng yuqori sifatli rasm
+    photo = message.photo[-1]
     photo_bytes = await photo.download(destination=io.BytesIO())
     photo_bytes.seek(0)
     user_photos[user_id] = photo_bytes.read()
@@ -113,16 +113,14 @@ def overlay_sticker(image_bytes, sticker_path):
 
     for (bbox, text, prob) in results:
         candidate = text.replace(" ", "").upper()
-        if len(candidate) >= 5 and any(char.isdigit() for char in candidate):
-            ratio = max(
-                SequenceMatcher(None, candidate, ref).ratio()
-                for ref in REFERENCE_TEXT
-            )
-            if ratio > best_ratio:
-                best_ratio = ratio
-                best_match = (bbox, candidate)
+        if any(char.isdigit() for char in candidate) and len(candidate) >= 3:
+            for ref in REFERENCE_TEXT:
+                ratio = SequenceMatcher(None, candidate, ref).ratio()
+                if ratio > best_ratio:
+                    best_ratio = ratio
+                    best_match = (bbox, candidate)
 
-    if best_match and best_ratio > 0.4:
+    if best_match and best_ratio > 0.25:
         (tl, tr, br, bl) = best_match[0]
         x_min = int(min(tl[0], bl[0]))
         y_min = int(min(tl[1], tr[1]))
