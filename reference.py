@@ -116,23 +116,28 @@ def overlay_sticker(image_bytes, sticker_path):
 
         if best_match and best_ratio > 0.1:
             (tl, tr, br, bl) = best_match[0]
-            x_min = int(min(tl[0], bl[0]))
-            y_min = int(min(tl[1], tr[1]))
-            x_max = int(max(tr[0], br[0]))
-            y_max = int(max(bl[1], br[1]))
-            w, h = x_max - x_min, y_max - y_min
+            dst_pts = np.array([tl, tr, br, bl], dtype="float32")
 
-            sticker = Image.open(sticker_path).convert("RGBA").resize((w, h))
-            img.paste(sticker, (x_min, y_min), sticker)
+            sticker = Image.open(sticker_path).convert("RGBA")
+            sticker_np = cv2.cvtColor(np.array(sticker), cv2.COLOR_RGBA2BGRA)
+
+            h, w = sticker_np.shape[:2]
+            src_pts = np.array([[0, 0], [w, 0], [w, h], [0, h]], dtype="float32")
+
+            matrix = cv2.getPerspectiveTransform(src_pts, dst_pts)
+            warped_sticker = cv2.warpPerspective(sticker_np, matrix, (cv_img.shape[1], cv_img.shape[0]), borderMode=cv2.BORDER_TRANSPARENT)
+
+            if cv_img.shape[2] == 3:
+                cv_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2BGRA)
+            combined = cv2.addWeighted(cv_img, 1.0, warped_sticker, 1.0, 0)
 
             output = io.BytesIO()
-            img.save(output, format='JPEG')
+            Image.fromarray(cv2.cvtColor(combined, cv2.COLOR_BGRA2RGB)).save(output, format='JPEG')
             output.seek(0)
             return output
     except Exception as e:
         print(f"Xatolik: {e}")
-
-    return None
+        return None
 
 if __name__ == '__main__':
     start_polling(dp, skip_updates=True)
