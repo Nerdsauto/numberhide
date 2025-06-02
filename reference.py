@@ -43,7 +43,7 @@ user_waiting = set()
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
     user_projects[user_id] = []
-    user_waiting.discard(user_id)  # foydalanuvchining eski holatini tozalaymiz
+    user_waiting.discard(user_id)
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(KeyboardButton("📷 Rasm almashtirish"))
     await message.reply("Assalomu alaykum!\nRasm yuboring (bir yoki bir nechta).", reply_markup=keyboard)
@@ -76,7 +76,7 @@ async def collect_photos(message: types.Message):
 @dp.message_handler(lambda message: message.text in STICKERS)
 async def apply_sticker_batch(message: types.Message):
     user_id = message.from_user.id
-    user_waiting.discard(user_id)  # ❗️foydalanuvchi stiker tanlagan — endi kutishdan chiqaramiz
+    user_waiting.discard(user_id)
 
     if user_id not in user_projects or not user_projects[user_id]:
         await message.reply("Iltimos, avval rasm yuboring.")
@@ -88,14 +88,14 @@ async def apply_sticker_batch(message: types.Message):
     for image_bytes in user_projects[user_id]:
         result = overlay_sticker(image_bytes, selected_sticker)
         if result:
-            await message.reply_photo(photo=types.InputFile(result, filename='modified.jpg'))
+            await bot.send_photo(chat_id=message.chat.id, photo=types.InputFile(result, filename='modified.jpg'))
         else:
-            await message.reply("❌ Raqam topilmadi.")
-            await message.reply_photo(photo=types.InputFile(io.BytesIO(image_bytes), filename='original.jpg'))
+            await bot.send_message(chat_id=message.chat.id, text="❌ Raqam topilmadi.")
+            await bot.send_photo(chat_id=message.chat.id, photo=types.InputFile(io.BytesIO(image_bytes), filename='original.jpg'))
 
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(KeyboardButton("📷 Rasm almashtirish"))
-    await message.reply("✅ Tayyor. Yana almashtirmoqchi bo‘lsangiz menyudan foydalaning.", reply_markup=keyboard)
+    await bot.send_message(chat_id=message.chat.id, text="✅ Tayyor. Yana almashtirmoqchi bo‘lsangiz menyudan foydalaning.", reply_markup=keyboard)
     user_projects[user_id] = []
 
 def overlay_sticker(image_bytes, sticker_path):
