@@ -53,7 +53,7 @@ async def reset_session(message: types.Message):
     user_id = message.from_user.id
     user_projects[user_id] = []
     user_waiting.discard(user_id)
-    await message.reply("Yangi loyiha boshlandi. Endi rasm yuboring.")
+    await message.reply("Og'a, yangi loyiha boshlandi. Endi rasm yuboring.")
 
 @dp.message_handler(content_types=types.ContentType.PHOTO)
 async def collect_photos(message: types.Message):
@@ -71,7 +71,7 @@ async def collect_photos(message: types.Message):
         keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
         for label in STICKERS:
             keyboard.add(KeyboardButton(label))
-        await message.reply("Qaysi logotipni qo'yay?", reply_markup=keyboard)
+        await message.reply("🤔Qaysi logotipni qo'yay shep?", reply_markup=keyboard)
 
 @dp.message_handler(lambda message: message.text in STICKERS)
 async def apply_sticker_batch(message: types.Message):
@@ -92,7 +92,7 @@ async def apply_sticker_batch(message: types.Message):
 
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(KeyboardButton("📷 Rasm almashtirish"))
-    await bot.send_message(chat_id=message.chat.id, text="✅ Tayyor. Yana almashtirmoqchi bo‘lsangiz menyudan foydalaning.", reply_markup=keyboard)
+    await bot.send_message(chat_id=message.chat.id, text="✅ Tayyor Jigarim. Yana almashtirmoqchi bo‘lsangiz menyuni qayta ishga tushuring😎.", reply_markup=keyboard)
     user_projects[user_id] = []
 
 def overlay_sticker(image_bytes, sticker_path):
