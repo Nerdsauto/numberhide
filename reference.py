@@ -43,6 +43,7 @@ user_waiting = set()
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
     user_projects[user_id] = []
+    user_waiting.discard(user_id)  # foydalanuvchining eski holatini tozalaymiz
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(KeyboardButton("📷 Rasm almashtirish"))
     await message.reply("Assalomu alaykum!\nRasm yuboring (bir yoki bir nechta).", reply_markup=keyboard)
@@ -51,6 +52,7 @@ async def start_handler(message: types.Message):
 async def reset_session(message: types.Message):
     user_id = message.from_user.id
     user_projects[user_id] = []
+    user_waiting.discard(user_id)
     await message.reply("Yangi loyiha boshlandi. Endi rasm yuboring.")
 
 @dp.message_handler(content_types=types.ContentType.PHOTO)
@@ -74,11 +76,12 @@ async def collect_photos(message: types.Message):
 @dp.message_handler(lambda message: message.text in STICKERS)
 async def apply_sticker_batch(message: types.Message):
     user_id = message.from_user.id
+    user_waiting.discard(user_id)  # ❗️foydalanuvchi stiker tanlagan — endi kutishdan chiqaramiz
+
     if user_id not in user_projects or not user_projects[user_id]:
         await message.reply("Iltimos, avval rasm yuboring.")
         return
 
-    user_waiting.discard(user_id)
     await message.reply("🛠 Ishlanmoqda...")
 
     selected_sticker = STICKERS[message.text]
